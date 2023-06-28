@@ -16,7 +16,7 @@ def dn_graph(num: int, removal: int = 0) -> nx.Graph:
     Use the Gray embedding 0 -> 00, 1 -> 01, 2 -> 11, -1 -> 10
     """
     gph = nx.Graph()
-    for eltx in dn_neighbors(num+1):
+    for eltx in dn_neighbors(num):
         for elt in product(range(2), repeat=num+1):
             nelt = np.array(elt, dtype=np.int8)
             gph.add_edge(elt, tuple((nelt ^ eltx).tolist()))
