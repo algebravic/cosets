@@ -15,7 +15,7 @@ def small_weight(num: int, wgt: int) -> Iterable[VEC]:
         yield num * (0,)
     elif wgt == num:
         yield num * (1,)
-    elif wgt < num and wgt > 0:
+    elif 0 < wgt < num:
         for elt in range(0,2):
             for rest in small_weight(num - 1, wgt - elt):
                 yield (elt,) + rest
@@ -24,17 +24,16 @@ def dn_neighbors(num: int) -> Iterable[VEC]:
     """
     Neighbors of 0 in the Dn graph    
     """
-    deltas = [(0,1), (1,0)]
-    ndeltas = [(0,0), (1,1)]
-    for delta in deltas:
-        yield delta + (num - 2) * (0,)
-    for delta in chain(small_weight(num - 2, 1),
-                       small_weight(num - 2, 2)):
-        for pref in product(range(2), repeat=2):
-            yield pref + delta
-    for ndelta in ndeltas:
-        for delta in small_weight(num - 2, 3):
-            yield ndelta + delta
+
+    yield from (delta + (num - 1) * (0,)
+                for delta in [(0,1), (1,0)])
+    yield from (pref + delta
+                for pref in product(range(2), repeat=2)
+                for delta in chain(small_weight(num - 1, 1),
+                                   small_weight(num - 1, 2)))
+    yield from (ndelta + delta
+                for ndelta in [(0,0), (1,1)]
+                for delta in small_weight(num - 1, 3))
 
 def dn_counting(num: int) -> int:
     """
