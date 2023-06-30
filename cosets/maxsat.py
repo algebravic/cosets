@@ -7,7 +7,7 @@ import networkx as nx
 import numpy as np
 from pysat.formula import WCNF, IDPool
 from pysat.examples.rc2 import RC2
-from .connection import dn_neighbors
+from .connection import dn_neighbors, candidates
 
 def maxsat_mis_model(gph: nx.Graph) -> Tuple[WCNF, IDPool]:
     """
@@ -48,26 +48,19 @@ def breaking_model(num: int) -> Tuple[WCNF, IDPool]:
     """
     cnf = WCNF()
     pool = IDPool()
-    for delta in dn_neighbors(num+1):
-        for elt in product(range(2), repeat=num + 1):
+    for delta in dn_neighbors(num):
+        for elt in product(range(2), repeat = num + 1):
             nelt = np.array(elt, dtype=np.int8)
             other = tuple((nelt ^ delta).tolist())
             if other > elt:
                 cnf.append([-pool.id(('x', elt)),
                             -pool.id(('x', other))])
-    for elt in product(range(2), repeat=num + 1):
+    for elt in product(range(2), repeat = num + 1):
         cnf.append([pool.id(('x', elt))], weight=1)
-    # Now put in the symmetry breaking constraints
+
     cnf.append([pool.id(('x', (num + 1) * (0,)))])
-    # The last n-1 bits can be permuted in any way
-    # When we have chosen the first k possibilities
-    # the bit pattern for each is right shifted in
-    # sectors.
-    candidates = [ _ * (0,) + (num - 1 - _) * (1,)
-                  for _ in range(num - 1)]
-    front = [(0,0), (0,1), (1,1)]
-    possible = [_[0] + _[1] for _ in product(front, candidates)]
-    cnf.append([pool.id(('x', _)) for _ in possible])
+    # One of the nodes from the remaining classes must be there
+    cnf.append([pool.id(('x', _)) for _ in candidates(num)])
 
     return cnf, pool
 
