@@ -8,6 +8,15 @@ import numpy as np
 import networkx as nx
 from .connection import dn_neighbors
 
+def remove_node_and_neighbors(gph: nx.Graph, node: Any):
+    """
+    Remove a node and its neighbors
+    """
+    nbrs = list(gph.neighbors(node))
+    gph.remove_node(node)
+    for nbr in nbrs:
+        gph.remove_node(nbr)
+
 def dn_graph(num: int, removal: int = 0) -> nx.Graph:
     """
     The Dn graph.
@@ -22,11 +31,7 @@ def dn_graph(num: int, removal: int = 0) -> nx.Graph:
             gph.add_edge(elt, tuple((nelt ^ eltx).tolist()))
     if removal == 1:
         # Remove 0 and all neighbors
-        zero = (num + 1) * (0,)
-        nbrs = list(gph.neighbors(zero))
-        gph.remove_node(zero)
-        for nbr in nbrs:
-            gph.remove_node(nbr)
+        remove_node_and_neighbors(gph, (num + 1) * (0,))
     return gph
 
 def independent(num: int) -> nx.Graph:
