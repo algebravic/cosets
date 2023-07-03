@@ -29,10 +29,8 @@ def dn_graph(num: int, removal: int = 0) -> nx.Graph:
         for elt in product(range(2), repeat=num+1):
             nelt = np.array(elt, dtype=np.int8)
             gph.add_edge(elt, tuple((nelt ^ eltx).tolist()))
-    if removal == 1:
-        # Remove 0 and all neighbors
-        remove_node_and_neighbors(gph, (num + 1) * (0,))
-    return gph
+    return nx.convert_node_labels_to_integers(gph,
+                                              ordering='sorted')
 
 def independent(num: int) -> nx.Graph:
     """ Independent graph on n nodes"""
