@@ -11,6 +11,8 @@ python-sat = "^0.1.8.dev7"
 sympy = "^1.12"
 networkx = "^3.1"
 numpy = "^1.25.0"
+pynauty = "^2.8.6"
+lazytree = "^0.3.3"
 
 
 [build-system]
