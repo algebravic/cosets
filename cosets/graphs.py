@@ -1,36 +1,24 @@
 """
 Generation of graphs, and writing them.
 """
-from typing import Tuple, Iterable, Any
+from typing import Tuple, Iterable, Hashable
 from itertools import product, chain
 from sympy import binomial
 import numpy as np
 import networkx as nx
-from .connection import dn_neighbors
 
-def remove_node_and_neighbors(gph: nx.Graph, node: Any):
+def remove_node_and_neighbors(ogph: nx.Graph, node: Hashable):
     """
-    Remove a node and its neighbors
-    """
-    nbrs = list(gph.neighbors(node))
-    gph.remove_node(node)
-    for nbr in nbrs:
-        gph.remove_node(nbr)
+    Remove a node and its neighbors.
 
-def dn_graph(num: int, removal: int = 0) -> nx.Graph:
+    If we want a maximum independent set containing node,
+    this will be the same as a maximum indpendent set in
+    the graph obtained by removing that node and its neighbors
+    along with the original node.
     """
-    The Dn graph.
-    Vertices are (z,b) where z in {-1,0,1,2}
-    and b is in {0,1}^(n-1).
-    Use the Gray embedding 0 -> 00, 1 -> 01, 2 -> 11, -1 -> 10
-    """
-    gph = nx.Graph()
-    for eltx in dn_neighbors(num):
-        for elt in product(range(2), repeat=num+1):
-            nelt = np.array(elt, dtype=np.int8)
-            gph.add_edge(elt, tuple((nelt ^ eltx).tolist()))
-    return nx.convert_node_labels_to_integers(gph,
-                                              ordering='sorted')
+    gph = ogph.copy()
+    gph.remove_nodes_from(list(gph.neighbors(node)) + [node])
+    return gph
 
 def independent(num: int) -> nx.Graph:
     """ Independent graph on n nodes"""
