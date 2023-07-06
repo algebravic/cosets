@@ -1,14 +1,11 @@
-from .graphs import dn_graph, remove_node_and_neighbors
+from .dndata import dn_graph, dn_group, dn_mis_tree
 from .output import write_csv, write_dimacs
-from .connection import dn_neighbors, dn_counting
-from .maxsat import maxsat_mis, breaking_mis
+from .maxsat import maxsat_mis
 
 __all__ = ['dn_graph',
-           'remove_node_and_neighbors',
+           'dn_group',
+           'dn_mis_tree',
            'write_csv',
            'write_dimacs',
-           'dn_neighbors',
-           'dn_counting',
            'maxsat_mis',
-           'breaking_mis'
            ]
