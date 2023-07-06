@@ -1,13 +1,17 @@
 """
 Use Max Sat for independent set.
 """
-from typing import List, Tuple, Iterable, Any
+from typing import List, Tuple, Iterable, Any, Callable
 from itertools import product
+from functools import partial
+from time import time
 import networkx as nx
 import numpy as np
+from lazytree import LazyTree
+from sympy.combinatorics import PermutationGroup
 from pysat.formula import WCNF, IDPool
 from pysat.examples.rc2 import RC2
-from .connection import dn_neighbors, candidates
+from .schreier import make_tree, tree_clauses
 
 def maxsat_mis_model(gph: nx.Graph) -> Tuple[WCNF, IDPool]:
     """
@@ -29,6 +33,9 @@ def solve_maxsat(cnf: WCNF, pool: IDPool,
     """
     solver = RC2(cnf, **kwds)
     soln = solver.compute()
+    if soln is None:
+        print("Formula is UNSAT!")
+        return None
     pos = [pool.obj(_) for _ in soln if _ > 0]
     answer = [_[1] for _ in pos if _ is not None and _[0] == stem]
     print("Time = {}".format(solver.oracle_time()))
@@ -41,32 +48,33 @@ def maxsat_mis(gph: nx.Graph, **kwds) -> Iterable[Tuple[int, ...]]:
     cnf, pool = maxsat_mis_model(gph)
     return solve_maxsat(cnf, pool, stem = 'x', **kwds)
 
-def breaking_model(num: int) -> Tuple[WCNF, IDPool]:
+def trace_iterable(count: int, data: Iterable[Any]) -> Iterable[Any]:
     """
-    Model for independent set in Dn graph with some symmetry
-    breaking constraints.
+    Progress indication for a stream.
     """
-    cnf = WCNF()
-    pool = IDPool()
-    for delta in dn_neighbors(num):
-        for elt in product(range(2), repeat = num + 1):
-            nelt = np.array(elt, dtype=np.int8)
-            other = tuple((nelt ^ delta).tolist())
-            if other > elt:
-                cnf.append([-pool.id(('x', elt)),
-                            -pool.id(('x', other))])
-    for elt in product(range(2), repeat = num + 1):
-        cnf.append([pool.id(('x', elt))], weight=1)
-
-    cnf.append([pool.id(('x', (num + 1) * (0,)))])
-    # One of the nodes from the remaining classes must be there
-    cnf.append([pool.id(('x', _)) for _ in candidates(num)])
-
-    return cnf, pool
-
-def breaking_mis(num: int, **kwds) -> Iterable[Tuple[int, ...]]:
+    ind = 1
+    for elt in data:
+        yield elt
+        ind += 1
+        if count > 0 and ind % count == 0:
+            print('X', end='', flush=True)
+    print('')
+    
+def maxsat_mis_tree(gph: nx.Graph,
+                    grp: PermutationGroup,
+                    depth: int,
+                    test: Callable[[LazyTree], bool] = lambda _: True,
+                    trace: int = 0,
+                    **kwds) -> Iterable[Any]:
     """
-    Use some symmetry breaking.
+    Use the tree model for symmetry breaking.
     """
-    cnf, pool = breaking_model(num)
+    start = time()
+    cnf, pool = maxsat_mis_model(gph)
+    cnf.append([pool.id(('x', min(gph.nodes)))])
+    trace_it = partial(trace_iterable, trace)
+    cnf.extend(trace_it(tree_clauses(pool, test, depth,
+                                     make_tree(gph, grp))))
+    end = time()
+    print(f"model time = {end - start}")
     return solve_maxsat(cnf, pool, stem = 'x', **kwds)
