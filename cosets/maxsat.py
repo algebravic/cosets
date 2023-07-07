@@ -12,6 +12,7 @@ from sympy.combinatorics import PermutationGroup
 from pysat.formula import WCNF, IDPool
 from pysat.examples.rc2 import RC2
 from .schreier import make_tree, tree_clauses
+from .graphs import heuristic_partition
 
 def maxsat_mis_model(gph: nx.Graph) -> Tuple[WCNF, IDPool]:
     """
@@ -38,7 +39,8 @@ def solve_maxsat(cnf: WCNF, pool: IDPool,
         return None
     pos = [pool.obj(_) for _ in soln if _ > 0]
     answer = [_[1] for _ in pos if _ is not None and _[0] == stem]
-    print("Time = {}".format(solver.oracle_time()))
+    if kwds.get('verbose', 0) > 0:
+        print(f"Time = {solver.oracle_time()}")
     return answer
 
 def maxsat_mis(gph: nx.Graph, **kwds) -> Iterable[Tuple[int, ...]]:
