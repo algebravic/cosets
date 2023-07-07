@@ -4,10 +4,12 @@ Use the greedy method (and refinements) from
 by Ignatiev, Morgado and Marques-Silva
 """
 from typing import List, Tuple, Iterable, FrozenSet, Hashable
-from itertools import combinations, chain
+from itertools import combinations, chain, product
+from collections import defaultdict
 import networkx as nx
 from pysat.formula import CNF, WCNF, IDPool
-from pysat.examples.rc2 import RC2
+from .maxsat import solve_maxsat
+from .graphs import heuristic_partition
 
 CLAUSE = List[int]
 
@@ -50,6 +52,8 @@ def ne_encoding(cnf: WCNF) -> WCNF:
             front.append(lit)
     return ncnf
 
+                
+
 def maxflow_conversion(soft: Tuple[CLAUSE, int]):
     """
     Use the maxflow rendering of MinSat to MaxSat.
@@ -75,51 +79,29 @@ def aux_graph(clauses: List[CLAUSE]) -> nx.Graph:
             gph.add_edge(tuple(node1), tuple(node2))
     return gph
 
-def heuristic_partition(gph: nx.Graph) -> List[FrozenSet[Tuple[int]]]:
+def compatible_sets(gph: nx.Graph) -> List[Tuple[Hashable, ...]]:
     """
-    Apply the heuristic partition algorithm.
+    See 'On Reducing MIS to MinSat
     """
-    parts = {} # A dict key: clique vertices
-    # value: all vertices not in clique
-    # which are adjancent to all vertices in clique
-
-    ngph = gph.copy()
-
-    while ngph.nodes:
-        # counts[node] will have the values (ncliques, deg(node))
-        # where ncliques is the number of cliques to which it's
-        # adjacent
-        # Find the node with the minimal value
-        choice = None
-        cnode = None
-        for node in ngph.nodes:
-            val = (sum((int(node in adj)
-                        for adj in parts.values())),
-                   ngph.degree(node))
-            if choice is None or val < choice:
-                choice = val
-                cnode = node
-        neighbors = set(gph.neighbors(cnode))
-        # in original graph, so as to contain all clique nodes
-        ngph.remove_node(cnode)
-
-        # Look to see if can be inserted into a clique
-        fclique = None
-        for clique in parts.keys():
-            if neighbors.issuperset(clique):
-                fclique = clique
-                break
-        new_neighbors = neighbors.intersection(ngph.nodes)
-        if fclique is not None:
-            newclique = fclique.union([cnode])
-            newnbrs = parts[fclique].union(
-                new_neighbors).difference(newclique)
-            del parts[fclique]
-            parts[newclique] = newnbrs
-        else:
-            parts[frozenset([cnode])] = new_neighbors
-
-    return list(parts.keys())
+    cnf, pool = greedy(gph)
+    incompatible = defaultdict(lambda : set())
+    igph = nx.Graph()
+    for clause in cnf.soft:
+        for lit1, lit2 in combinations(clause, 2):
+            if lit1 * lit2 < 0:
+                igph.add_edge(lit1, lit2)
+    cgph = nx.complement(aux_graph(cnf.soft))
+    for clause1, clause2 in cgph.edges:
+        for lit1, lit2 in product(clause1, clause2):
+            igph.add_edge(lit1, -lit2)
+            igph.add_edge(lit2, -lit1)
+    agph = nx.complement(igph)
+    # positive literals
+    positive = set(map(abs,chain(*cnf.soft)))
+    classes = set()
+    for node in positive:
+        classes.add(frozenset(list(agph.neighbors(_)) + [_]))
+    return classes
 
 def clique_encoding(gph: nx.Graph) -> Tuple[CNF, IDPool]:
     """
@@ -141,12 +123,9 @@ def new_solve(gph: nx.Graph, **kwds) -> Tuple[CNF, IDPool]:
     """
     cnf, pool = greedy(gph)
     xcnf, xpool = clique_encoding(aux_graph(cnf.soft))
-    solver = RC2(xcnf, **kwds)
-    asoln = solver.compute()
+    asoln = solve_maxsat(xcnf, xpool, stem='c', **kwds)
     # Find the soft clauses
-    pos = [xpool.obj(_) for _ in asoln if _ > 0]
-    psoln = set(chain(*[_[1] for _ in pos
-                        if _ is not None and _[0] == 'c']))
+    psoln = set(chain(*asoln))
     # psoln is the set of positive literal in the graph cnf encoding
     npos = [pool.obj(_) for _ in psoln if _ > 0]
     return [_[1] for _ in npos if _ is not None and _[0] == 'x']
