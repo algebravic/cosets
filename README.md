@@ -74,5 +74,5 @@ the graph.  For the resulting graph we have an automorphism group of
 size $4 (n-1)!$, which consists of arbitrary permutations of the last
 $n-1$ coordinates, permuations of the first 2 coordinates, plus adding
 $(1,1)$ to the first two coordinates.  This group leaves the set
-$\{(0, \dots, 0), (1,1,0, \dots, 0)\}$ invariant.
+$`\{(0, \dots, 0), (1,1,0, \dots, 0)\}`$ invariant.
 
