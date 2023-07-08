@@ -9,6 +9,13 @@ graph structure on $`C_n`$ induced by the Hamming metric.  The
 question at hand is: what is the cardinality of the largest
 independent set on $`C_n`$?
 
+To install use `python poetry` package (install it from `pypi`).
+After cloning this repository run the command
+
+    poetry install
+
+in the directory.  This will install all dependencies.
+
 From Veit Elser:
 
 For constructing the graph I like to work with a convenient choice of
