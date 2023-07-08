@@ -37,10 +37,10 @@ Euclidean distance is less than 2 (sum of squares less than 4). That
 gives you the following cases for when to connect $`(z_1, b_1)`$ and
 $`(z_2, b_2)`$:
 
-a) if $`h(b_1,b_2) = 0`$ and $`g(z_1,z_2) = 1`$
-b) if $`h(b_1,b_2) = 1`$
-c) if $`h(b_1,b_2) = 2`$
-d) if $`h(b_1,b_2) = 3`$ and $`g(z_1,z_2) \ne 1`$.
+a) if $`h(b_1,b_2) = 0`$ and $`g(z_1,z_2) = 1`$  
+b) if $`h(b_1,b_2) = 1`$  
+c) if $`h(b_1,b_2) = 2`$  
+d) if $`h(b_1,b_2) = 3`$ and $`g(z_1,z_2) \ne 1`$.  
 
 You can show this by again adding pairs of coordinate 2’s, one of
 which is in the first position.
@@ -56,9 +56,9 @@ convenience define the map $`\phi: \mathbb{F}_2^{n+1} \rightarrow
 first 2 coordinates, respectively.  If we define the set $S$ as being
 the union of the following sets
 
-$`\{z: \psi(z) \in \{(0,1),(1,0)\}, \phi(z) = 0\}`$,
-$`\{z : \text{wt}(\phi(z)) = 1,2\}`$
-$`\{z: \psi(z) \in \{(0,0),(1,1)\}, \text{wt}(\phi(z)) = 3\}`$,
+$`\{z: \psi(z) \in \{(0,1),(1,0)\}, \phi(z) = 0\}`$,  
+$`\{z : \text{wt}(\phi(z)) = 1,2\}`$  
+$`\{z: \psi(z) \in \{(0,0),(1,1)\}, \text{wt}(\phi(z)) = 3\}`$,  
 
 then edge in the graph exists between $z$ and $w$ if and only if
 $z+w \in S$.
