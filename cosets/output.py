@@ -2,6 +2,7 @@
 Write a networkx undirected graph to DIMACS format
 """
 from typing import Iterable, Any
+from pathlib import Path
 import networkx as nx
 
 def _gen_dimacs(gph: nx.Graph) -> Iterable[str]:
@@ -23,6 +24,23 @@ def write_dimacs(gph: nx.Graph, name: str):
         fil.write('\n'.join(_gen_dimacs(gph)))
         fil.write('\n')
 
+def _gen_metis(gph: nx.Graph) -> Iterable[str]:
+    """
+    Generate the lines for a METIS graph.
+    """
+    ngph = nx.convert_node_labels_to_integers(gph, first_label=1)
+    yield f'{len(ngph.nodes)} {len(ngph.edges)}'
+    yield from (' '.join(map(str,sorted(ngph.neighbors(_)))) for _ in sorted(ngph.nodes))
+
+def write_metis(gph: nx.Graph, name: str):
+    """
+    Write a METIS graph.
+    """
+    nfile = Path(name)
+    with open(nfile.parent / (nfile.stem + '.metis'), 'w', encoding='utf8') as fil:
+        fil.write('\n'.join(_gen_metis(gph)))
+        fil.write('\n')
+        
 def normalize(elt: Any) -> str:
     """ Normalize list and tuple """
     return ('|'.join(map(str, elt))
