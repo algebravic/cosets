@@ -70,5 +70,9 @@ loss of generality, up to action by this group, we may assume that a
 maximum independent set contains $0$, and does not contain $S$.  Note
 that the vertex $(1,1,0, \dots, 0)$ has the same neighbors as 0.  Thus
 we may remove both 0 and that vertex plus their common neighbors from
-the graph.
+the graph.  For the resulting graph we have an automorphism group of
+size $4 (n-1)!$, which consists of arbitrary permutations of the last
+$n-1$ coordinates, permuations of the first 2 coordinates, plus adding
+$(1,1)$ to the first two coordinates.  This group leaves the set
+$\{(0, \dots, 0), (1,1,0, \dots, 0)\}$ invariant.
 
