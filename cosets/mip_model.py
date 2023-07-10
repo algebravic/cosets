@@ -3,7 +3,7 @@ Use the mip package to model independent set
 """
 from typing import Iterable, Hashable, Tuple, Dict
 import networkx as nx
-from mip import Model, INTEGER, CONTINUOUS, BINARY, xsum
+from mip import Model, INTEGER, CONTINUOUS, BINARY, xsum, MAXIMIZE
 
 def mip_model(gph: nx.Graph) -> Tuple[Model, Dict[Hashable, int]]:
     """
@@ -13,7 +13,7 @@ def mip_model(gph: nx.Graph) -> Tuple[Model, Dict[Hashable, int]]:
                                               ordering='sorted')
     dct = {ind: val for ind, val in enumerate(sorted(gph.nodes))}
     mvars = {}
-    model = Model()
+    model = Model(sense=MAXIMIZE)
     mvars = [model.add_var(name = f'x{node}', var_type=BINARY)
              for node in ngph.nodes]
         
@@ -22,3 +22,9 @@ def mip_model(gph: nx.Graph) -> Tuple[Model, Dict[Hashable, int]]:
     model.objective = xsum(mvars)
 
     return model, dct
+
+def cnf_model(cnf: WCNF) -> Tuple[Model, Dict[int, int]]:
+    """
+    Render a weight CNF as a MIP
+    """
+    top = cnf.nv
