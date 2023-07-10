@@ -106,8 +106,8 @@ def maxsat_mis_tree(gph: nx.Graph,
        test: a test function to determine to expand a node
        kwds: key words for the RC2 solver
     """
-    cnf, pool = mis_tree_model(gph: nx.Graph,
-                               grp: PermutationGroup,
+    cnf, pool = mis_tree_model(gph,
+                               grp,
                                depth = depth,
                                test = test,
                                trace = trace)
