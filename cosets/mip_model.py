@@ -3,6 +3,7 @@ Use the mip package to model independent set
 """
 from typing import Iterable, Hashable, Tuple, Dict
 import networkx as nx
+from pysat.formula import CNF, WCNF, IDPool
 from mip import Model, INTEGER, CONTINUOUS, BINARY, xsum, MAXIMIZE
 
 def mip_model(gph: nx.Graph) -> Tuple[Model, Dict[Hashable, int]]:
