@@ -62,14 +62,22 @@ def trace_iterable(count: int, data: Iterable[Any]) -> Iterable[Any]:
             print('X', end='', flush=True)
     print('')
     
-def maxsat_mis_tree(gph: nx.Graph,
-                    grp: PermutationGroup,
-                    depth: int,
-                    test: Callable[[LazyTree], bool] = lambda _: True,
-                    trace: int = 0,
-                    **kwds) -> Iterable[Any]:
+def mis_tree_model(gph: nx.Graph,
+                   grp: PermutationGroup,
+                   depth: int = 1,
+                   test: Callable[[LazyTree], bool] = lambda _: True,
+                   trace: int = 0) -> Tuple[WCNF, IDPool]:
     """
     Use the tree model for symmetry breaking.
+    Inputs:
+       gph: The unidirected graph
+       grp: A group of automorphisms
+           (we assume that gph is vertex transitive under grp)
+       depth: The depth of the symmetry breaking tree.
+       test: a test function to determine to expand a node
+    Output:
+       cnf: the weighted CNF for the model
+       pool: The ID Pool for the CNF
     """
     start = time()
     cnf, pool = maxsat_mis_model(gph)
@@ -79,4 +87,30 @@ def maxsat_mis_tree(gph: nx.Graph,
                                      make_tree(gph, grp))))
     end = time()
     print(f"model time = {end - start}")
+    return cnf, pool
+
+def maxsat_mis_tree(gph: nx.Graph,
+                    grp: PermutationGroup,
+                    depth: int = 1,
+                    test: Callable[[LazyTree], bool] = lambda _: True,
+                    trace: int = 0,
+                    **kwds) -> Iterable[Any]:
+    """
+    Solve MIS of a graph with a symmetry group using Max Sat
+    Inputs:
+       See mis_tree_model for explanation of parameters.
+       gph: The unidirected graph
+       grp: A group of automorphisms
+           (we assume that gph is vertex transitive under grp)
+       depth: The depth of the symmetry breaking tree.
+       test: a test function to determine to expand a node
+       kwds: key words for the RC2 solver
+    """
+    cnf, pool = mis_tree_model(gph: nx.Graph,
+                               grp: PermutationGroup,
+                               depth = depth,
+                               test = test,
+                               trace = trace)
+    
     return solve_maxsat(cnf, pool, stem = 'x', **kwds)
+
