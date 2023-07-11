@@ -40,7 +40,7 @@ def cnf_model(cnf: WCNF) -> Tuple[Model, Dict[int, int]]:
     """
     model = Model(sense=MAXIMIZE)
     top = cnf.nv
-    variables = [model.add_var(name = f'x{node}', var_type=BINARY)
+    variables = [model.add_var(name = f'x{ind}', var_type=BINARY)
                  for ind in range(1, top+1)]
     
     # First the hard clauses
