@@ -51,7 +51,7 @@ def cnf_model(cnf: WCNF) -> Tuple[Model, Dict[int, int]]:
     for ind, (clause, wgt) in enumerate(zip(cnf.soft, cnf.wght)):
         svar = model.add_var(name='s{ind}', var_type=BINARY)
         top += 1
-        variables.append(top)
+        variables.append(svar)
         model += _get_clause([-top] + clause, variables)
         objective.append(wgt * svar)
 
